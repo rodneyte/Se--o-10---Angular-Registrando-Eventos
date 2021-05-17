@@ -1,9 +1,8 @@
 using System.Threading.Tasks;
-using ProEventos.Domain;
 
 namespace ProEventos.Persistence.Contratos
 {
-    
+
     public interface IGeralPersist
     {
         void Add<T>(T entity) where T: class;
