@@ -1,4 +1,3 @@
-import { Template } from '@angular/compiler/src/render3/r3_ast';
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AbstractControl,
          FormArray,
@@ -120,7 +119,6 @@ export class EventoDetalheComponent implements OnInit {
       lotes: this.fb.array([])
     });
   }
-
   adicionarLote(): void{
     this.lotes.push(this.criarLote({id: 0} as Lote));
   }
@@ -132,15 +130,15 @@ export class EventoDetalheComponent implements OnInit {
           nome: [lote.nome, Validators.required],
           quantidade: [lote.quantidade, Validators.required],
           preco: [lote.preco, Validators.required],
-          dataInicio: [lote.dataInicio, Validators.required],
-          dataFim: [lote.dataFim, Validators.required]
+          dataInicio: [lote.dataInicio],
+          dataFim: [lote.dataFim]
       });
   }
 
-  public mudarValor(value: Date , indice: number, campo: string): void{
+  public mudarValorData(value: Date , indice: number, campo: string): void{
     this.lotes.value[indice][campo] = value;
   }
-public retornaTituloLotes(nome: string): string
+public retornaTituloLote(nome: string): string
 {
   return nome === null || nome === '' ? 'Nome do lote' : nome;
 }
