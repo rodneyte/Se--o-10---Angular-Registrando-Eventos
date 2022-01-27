@@ -15,6 +15,13 @@ using System;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
+using ProEventos.Domain.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Collections.Generic;
 
 namespace ProEventos.API
 {
@@ -33,24 +40,89 @@ namespace ProEventos.API
             services.AddDbContext<ProEventosContext>(
                 context=> context.UseSqlite(Configuration.GetConnectionString("Default"))
             );
+
+            services.AddIdentityCore<User>(options =>
+                {   options.Password.RequireDigit = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 4;
+                }
+            )
+            .AddRoles<Role>()
+            .AddRoleManager<RoleManager<Role>>()
+            .AddSignInManager<SignInManager<User>>()
+            .AddRoleValidator<RoleValidator<Role>>()
+            .AddEntityFrameworkStores<ProEventosContext>()//Para o evendo do IdentityCore afirma o contexto
+            .AddDefaultTokenProviders();//se não colocar esta configuração o reset senha não funciona no
+            //AccountService var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),
+                            ValidateIssuer = false,
+                            ValidateAudience = false
+                        };
+                    });
+           
             services.AddControllers()
-                        .AddNewtonsoftJson(x=>x.SerializerSettings.ReferenceLoopHandling=
-                        Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                        .AddJsonOptions(options =>//faz ele recebe e retorna um enum
+                                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()) 
+                                        )
+                        //a cumunidade esta tentando usar minimamente possivel do "newtonSoft"
+                        .AddNewtonsoftJson(options=>options.SerializerSettings.ReferenceLoopHandling=
+                        Newtonsoft.Json.ReferenceLoopHandling.Ignore //evitar lupp infinito no json
             );
             //AppDomain dominio da aplicação/ CurrentDomain contexto aplicação/ encontra a dll automapper 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IEventoService,EventoService>();
             services.AddScoped<ILoteService, LoteService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAccountService, AccountService>();
 
             services.AddScoped<IGeralPersist,GeralPersist>();
             services.AddScoped<IEventoPersist, EventoPersist>();
             services.AddScoped<ILotePersist, LotePersist>();
+            services.AddScoped<IUserPersist, UserPersist>();
            
             services.AddCors();
-            services.AddSwaggerGen(c =>
+            //cria a passagem do token como obrigatorio no swagger
+            services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProEventos.API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "ProEventos.API", Version = "v1" });
+                options.AddSecurityDefinition("Bearer",new OpenApiSecurityScheme
+                {
+                        Description = @"JWT Authorization header usado é Bearer,
+                                       Entre com 'Bearer' [espaço] então coloque o token.
+                                       Exemplo: 'Bearer 1234562adfalçk'",
+                        Name="Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer"
+                });
+                
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {   
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference =new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme="outh2",
+                            Name="Bearer",
+                            In=ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
             });
         }
 
@@ -68,6 +140,7 @@ namespace ProEventos.API
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(x=>x.AllowAnyHeader()
