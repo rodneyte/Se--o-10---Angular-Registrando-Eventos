@@ -65,7 +65,7 @@ export class EventoListaComponent implements OnInit {
       : `assets/img/semimagem.jpg`;
   }
   public carregarEventos(): void{
-      this.eventoService.getEvento().subscribe({
+      this.eventoService.getEventos().subscribe({
         next: (eventos: Evento[]) => {
           this.eventos = eventos;
           this.eventosFiltrados = this.eventos;

@@ -16,7 +16,8 @@ namespace ProEventos.Persistence
             // _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        public async Task<Evento[]> GetAllEventosAsync(int userId,bool includePalestrantes = false)
+        public async Task<Evento[]> GetAllEventosAsync(int userId,
+                                                               bool includePalestrantes = false)
         {
             IQueryable<Evento> query = _context.Eventos
                 .Include(e => e.Lotes)

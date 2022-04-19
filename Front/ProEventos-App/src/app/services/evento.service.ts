@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Evento } from '../models/Evento';
@@ -9,12 +9,11 @@ import { environment } from '@environments/environment';
 })
 export class EventoService {
   baseUrl = environment.apiURL + 'api/eventos';
-constructor(private http: HttpClient) { }
 
-  public getEvento(): Observable<Evento[]>{
-    return this.http
-    .get<Evento[]>(this.baseUrl)
-    .pipe(take(1));
+  constructor(private http: HttpClient) { }
+
+  public getEventos(): Observable<Evento[]>{
+    return this.http.get<Evento[]>(this.baseUrl).pipe(take(1));
   }
   public getEventosByTema(tema: string): Observable<Evento[]>{
     return this.http

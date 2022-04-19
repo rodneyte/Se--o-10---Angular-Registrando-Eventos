@@ -11,12 +11,12 @@ export class TituloComponent implements OnInit {
   @Input() iconClass = 'fa fa-user';
   @Input() subtitulo = 'Deste 2021';
   @Input() botaoListar = false;
-  constructor(private router:Router) { }
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
   }
-  listar():void{
-    this.router.navigate([`/${this.titulo.toLowerCase()}/lista`])
+  listar(): void{
+    this.router.navigate([`/${this.titulo.toLowerCase()}/lista`]);
   }
 
 }

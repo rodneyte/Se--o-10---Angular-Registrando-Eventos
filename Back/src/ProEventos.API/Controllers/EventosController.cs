@@ -31,21 +31,23 @@ namespace ProEventos.API.Controllers
             _eventoService = eventoService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            try
-            {
-                var eventos = await _eventoService.GetAllEventoAsync(User.GetUserId(), true);
-                if (eventos == null) return NoContent();
-                return Ok(eventos);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-            }
-        }
+         [HttpGet]
+         public async Task<IActionResult> Get()
+         {
+             try
+             {
+
+                 var eventos = await _eventoService.GetAllEventosAsync(User.GetUserId(), true);
+                 if (eventos == null) return NoContent();
+                 return Ok(eventos);
+                 
+             }
+             catch (Exception ex)
+             {
+                 return this.StatusCode(StatusCodes.Status500InternalServerError,
+                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
+             }
+         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

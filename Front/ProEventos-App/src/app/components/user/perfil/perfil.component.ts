@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControlOptions, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ValidatorField } from '@app/helpers/ValidatorField';
+import { UserUpdate } from '@app/models/identity/UserUpdate';
+import { AccountService } from '@app/services/account.service';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-perfil',
@@ -9,31 +14,77 @@ import { ValidatorField } from '@app/helpers/ValidatorField';
 })
 export class PerfilComponent implements OnInit {
 
+  userUpdate = {} as UserUpdate;
   form!: FormGroup;
 
-  constructor(public fb: FormBuilder) { }
+  constructor(
+    public fb: FormBuilder,
+    public accountService: AccountService,
+    private router: Router,
+    private toaster: ToastrService,
+    private spnner: NgxSpinnerService) { }
 
   get f(): any { return this.form.controls; }
 
+  onSubmit(): void {
+   this.atualizarUsuario();
+  }
+
+  public atualizarUsuario(): void
+  {
+      this.userUpdate = {...this.form.value };
+      this.spnner.show();
+      this.accountService.updateUser(this.userUpdate).subscribe(
+        () => this.toaster.success('Usuário atualizado com Sucesso', 'Sucesso'),
+        (error) => {
+          this.toaster.error(error.error);
+          console.error(error);
+        },
+      )
+      .add(() => this.spnner.hide());
+  }
+
   ngOnInit(): void {
     this.validation();
+    this.carregarUsuario();
+  }
+
+  private carregarUsuario(): void
+  {
+    this.spnner.show();
+    this.accountService.getUser().subscribe(
+      (userRetorno: UserUpdate) => {
+        console.log(userRetorno);
+        this.userUpdate = userRetorno;
+        this.form.patchValue(this.userUpdate);
+        this.toaster.success('Usuário carregado', 'Sucesso');
+      },
+      (error) => {
+        console.error(error);
+        this.toaster.error('Usuário não carregado', 'Erro');
+        this.router.navigate(['/dashborad']);
+      }
+    )
+    .add(() => this.spnner.hide());
+
   }
   private validation(): void {
 
     const formOptions: AbstractControlOptions = {
-      validators: ValidatorField.MustMatch('senha', 'confirmeSenha')
+      validators: ValidatorField.MustMatch('password', 'confirmePassword')
     };
 
     this.form = this.fb.group({
-      titulo: ['', Validators.required],
+      userName: [''],
+      titulo: ['NaoInformado', Validators.required],
       primeiroNome: ['', Validators.required],
       ultimoNome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      telefone: ['', Validators.required],
-      funcao: ['', Validators.required],
+      phoneNumber: ['', Validators.required],
+      funcao: ['NaoInformado', Validators.required],
       descricao: ['', Validators.required],
-      senha: ['', [Validators.minLength(6), Validators.nullValidator]],
-      confirmeSenha: ['', Validators.nullValidator]
+      password: ['', [Validators.minLength(4), Validators.nullValidator]],
+      confirmePassword: ['', Validators.nullValidator]
     }, formOptions );
   }
 

@@ -7,7 +7,7 @@ namespace ProEventos.Application.Dtos
 {
     public class UserLoginDto
     {
-        public string UserName { get; set; }
-        public string Passoword { get; set; }
+        public string userName { get; set; }
+        public string passowrd { get; set; }
     }
 }

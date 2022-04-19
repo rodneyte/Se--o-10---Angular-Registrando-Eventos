@@ -89,7 +89,7 @@ namespace ProEventos.Application
                 
         }
 
-        public async Task<EventoDto[]> GetAllEventoAsync(int userId,bool incluirPalestrantes = false)
+        public async Task<EventoDto[]> GetAllEventosAsync(int userId,bool incluirPalestrantes = false)
         {
             try
             {

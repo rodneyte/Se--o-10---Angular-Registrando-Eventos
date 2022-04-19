@@ -13,7 +13,7 @@ namespace ProEventos.Application.Dtos
         public string PrimeiroNome { get; set; }
         public string UltimoNome { get; set; }
         public string Email{get;set;}
-        public string ProneNumber { get; set; }
+        public string PhoneNumber { get; set; }
         public string Funcao { get; set; }
         public string Descricao { get; set; }
         public string Passoword { get; set; }
